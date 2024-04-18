@@ -22,21 +22,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
    
-    $email = mysqli_real_escape_string($conn, $email);
+    
     $username = mysqli_real_escape_string($conn, $username);
     $password = mysqli_real_escape_string($conn, $password);
 
+    $sql_check = "SELECT * FROM user WHERE nama = '$username'";
+    $result = mysqli_query($conn, $sql_check);
+
+  if (mysqli_num_rows($result) > 0) {
+    echo "<script>alert('Username Sudah digunakan.');</script>";
+  } else {
    
-    $sql = "INSERT INTO user ( nama, password) VALUES ( '$username', '$password')";
+    $sql = "INSERT INTO user (nama, password) VALUES ('$username', '$password')";
     if (mysqli_query($conn, $sql)) {
-        $_SESSION['registration_success'] = true;
-        header("Location: login.php");
-        exit();
+        
+      $_SESSION['registration_success'] = true;
+      header("Location: login.php");
+      exit();
+    
     } else {
         echo "Error: " . $sql . "<br>" . mysqli_error($conn);
     }
+  }
 }
-
+  
 mysqli_close($conn);
 ?>
 <!DOCTYPE html>
@@ -74,14 +83,16 @@ mysqli_close($conn);
             </div>
             <div class="mb-3">
                 <label for="exampleInputUsername" class="form-label">Username</label>
-                <input type="text" class="form-control" id="exampleInputUsername" name="username">
+                <input type="text" class="form-control" id="exampleInputUsername" name="username"required>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+                <input type="password" class="form-control" id="exampleInputPassword1" name="password"required>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
+            
         </form>
     </div>
 </body>
 </html>
+<form action="bayar.php" method="post"> 

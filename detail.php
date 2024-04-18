@@ -12,15 +12,16 @@
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                
                     <form action="simpan.php" method="POST">
                         <input type="hidden" name="id_produk" value="<?php echo $_GET['id']; ?>">
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </form>
                 </li>
-                 <form action="simpan.php" method="POST">
                 <li class="nav-item" style="margin: 0 10px;">
-                    <button type="submit" class="btn btn-success">Beli</button>
+                    <form action="beli.php" method="POST">
+                        <input type="hidden" name="id_produk" value="<?php echo $_GET['id']; ?>">
+                        <button type="submit" class="btn btn-success">Beli</button>
+                    </form>
                 </li>
             </ul>
         </div>
@@ -30,42 +31,31 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <!-- Konten detail produk -->
-        </div>
-    </div>
-</div>
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
             <?php
-            
+            session_start();
+            if (!isset($_SESSION['user_id'])) {
+                header("Location: login.php");
+                exit();
+            }
             $servername = "localhost";
             $username = "root";
             $password = "";
             $database = "web";
 
             $conn = mysqli_connect($servername, $username, $password, $database);
-
-            
+      
             if (!$conn) {
                 die("Koneksi gagal: " . mysqli_connect_error());
             }
 
-           
             if (isset($_GET['id'])) {
-                
                 $id_produk = mysqli_real_escape_string($conn, $_GET['id']);
 
-                
-                $sql = "SELECT nama,gambar,deskripsi FROM produk WHERE id_produk = '$id_produk'";
+                $sql = "SELECT nama, gambar, deskripsi FROM produk WHERE id_produk = '$id_produk'";
                 $result = mysqli_query($conn, $sql);
 
-               
                 if ($result) {
-                   
                     if (mysqli_num_rows($result) > 0) {
-                 
                         $row = mysqli_fetch_assoc($result);
                         echo '<h2 class="text-center mb-4">Detail Produk</h2>';
                         echo '<div class="card">';
@@ -82,7 +72,6 @@
                     echo '<div class="alert alert-danger" role="alert">Error: ' . mysqli_error($conn) . '</div>';
                 }
 
-                
                 mysqli_close($conn);
             } else {
                 echo '<div class="alert alert-warning" role="alert">Parameter id tidak ditemukan.</div>';

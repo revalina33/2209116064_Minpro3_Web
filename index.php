@@ -33,9 +33,6 @@
 <div class="container p-0 mb-4 mt-4 rounded-3 shadow bg-white">
     <!-- menu -->
     <nav class="d-md-flex p-4">
-        
-       
-       
     </nav>
     <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
   <div class="carousel-indicators">
@@ -72,17 +69,34 @@
     <span class="visually-hidden">Next</span>
   </button>
 </div>  
-    <!-- konten -->
-    <div class="px-4 mb-4">
-        <h2 id="Sosial_Media"></h2>
+<br>
+<br>
+<br>
+
+<div class="px-4 mb-4">
+        <h2 id="Simpan"></h2>
         <div class="px-4 mb-4 d-flex justify-content-end">
         <img src="logo belanja.png" class="rounded-3" style="width: 40px; height: auto; cursor: pointer;" onclick="redirectToTampilanSimpan()" />
+
+</div>
+<div class="px-4 mb-4 d-flex justify-content-end">
+  <select id="sort-by" class="form-select">
+    <option value="default">tampilan harga</option>
+    <option value="harga-asc">Harga Terkecil</option>
+    <option value="harga-desc">Harga Tertinggi</option>
+  </select>
+  </div>
 
         </div>
         <!-- Daftar Barang -->
         <div class="row row-cols-md-3 row-cols-2 gx-5 p-5">
             <?php
-          
+            session_start(); 
+          if (!isset($_SESSION['user_id'])) {
+            header("Location: login.php");
+            exit();
+        }
+          $sort = isset($_GET['sort']) ? $_GET['sort'] : 'default';
             $servername = "localhost";
             $username = "root";
             $password = "";
@@ -96,6 +110,11 @@
 
            
             $sql = "SELECT id_produk, gambar, nama, deskripsi,harga FROM produk";
+            if ($sort === 'harga-asc') {
+              $sql .= " ORDER BY harga ASC";
+            } else if ($sort === 'harga-desc') {
+              $sql .= " ORDER BY harga DESC";
+            }
             $result = mysqli_query($conn, $sql);
 
             if (mysqli_num_rows($result) > 0) {
@@ -177,6 +196,38 @@
     function redirectToTampilanSimpan() {
         window.location.href = "tampilan_simpan.php";
     }
+
+  const sortBySelect = document.getElementById('sort-by');
+  const sortDescButton = document.getElementById('sort-desc');
+  const sortAscButton = document.getElementById('sort-asc');
+
+
+  sortBySelect.addEventListener('change', function() {
+    const sortValue = this.value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', sortValue);
+    window.location.href = url.toString();
+  });
+
+ 
+  function updateButtonStyles() {
+    const selectedSort = sortBySelect.value;
+    if (selectedSort === 'harga-asc') {
+      sortAscButton.classList.remove('disabled');
+      sortDescButton.classList.add('disabled');
+    } else if (selectedSort === 'harga-desc') {
+      sortDescButton.classList.remove('disabled');
+      sortAscButton.classList.add('disabled');
+    } else {
+      sortAscButton.classList.add('disabled');
+      sortDescButton.classList.add('disabled');
+    }
+  }
+
+  updateButtonStyles();  
+
+
+
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>

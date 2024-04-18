@@ -33,7 +33,12 @@
             <option value="2">Pembeli</option>
         </select>
     </div>
-    <div id="register" style="text-decoration: underline; color: black;" class="form-text mt-3 text-end " onclick="redirectToRegister()">register?</div>
+    <div class="mb-3">
+            <div style="display: flex; justify-content: space-between;">
+                <div style="text-decoration: underline; color: black;" class="form-text" onclick="redirectToRegister()">register?</div>
+               
+            </div>
+            <br>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
@@ -43,6 +48,9 @@
         <script>
     function redirectToRegister() {
         window.location.href = 'register.php';
+    }
+    function redirectToIndex(){
+        window.location.href ='index.php';
     }
 </script>
 
@@ -76,7 +84,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = mysqli_real_escape_string($conn, $password);
 
     
-    $table = ($role == '1') ? 'admin' : 'user';
+    if ($role == '1') {
+        $table = 'admin';
+        $id_column = 'id';
+    } else {
+        $table = 'user';
+        $id_column = 'id_user';
+    }
 
     $sql = "SELECT * FROM $table WHERE nama='$username' AND password='$password'";
     $result = mysqli_query($conn, $sql);
@@ -85,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result && mysqli_num_rows($result) > 0) {
         
         $row = mysqli_fetch_assoc($result);
-        $_SESSION['user_id'] = $row['id_user']; 
+        $_SESSION['user_id'] = $row[$id_column]; 
     
         if ($role == '1') {
             header("Location: admin.php");

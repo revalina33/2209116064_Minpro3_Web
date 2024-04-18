@@ -1,6 +1,17 @@
 <?php
 session_start(); 
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] == 'guest') {
+    echo "<script>alert('Log in terlebih dahulu.');</script>";
+    header("Location: login.php");
+    exit();
+}
+
 $servername = 'localhost';
 $username = 'root';
 $password = '';
@@ -14,11 +25,7 @@ if (!$conn) {
     die("Koneksi gagal: " . mysqli_connect_error());
 }
 
-if (!isset($_SESSION['user_id'])) {
-  
-    header("Location: login.php");
-    exit(); 
-}
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     

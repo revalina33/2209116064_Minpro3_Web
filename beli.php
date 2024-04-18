@@ -1,73 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beli Produk</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-</head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
-    <div class="container">
-        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-           
-        </div>
-    </div>
-</nav>
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-          
-            <?php
-            
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $database = "web";
+if (isset($_POST['id_produk'])) {
+    $_SESSION['id_produk'] = $_POST['id_produk'];
+}
 
-            $conn = mysqli_connect($servername, $username, $password, $database);
+if (isset($_SESSION['id_produk'])) {
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $database = "web";
+    $conn = mysqli_connect($servername, $username, $password, $database);
 
-     
-            if (!$conn) {
-                die("Koneksi gagal: " . mysqli_connect_error());
-            }
+    if (!$conn) {
+        die("Koneksi gagal: " . mysqli_connect_error());
+    }
 
-            if (isset($_GET['id'])) {
-               
-                $id_produk = mysqli_real_escape_string($conn, $_GET['id']);
+    $id_produk = $_SESSION['id_produk'];
+    $sql = "SELECT nama, harga FROM produk WHERE id_produk = '$id_produk'";
+    $result = mysqli_query($conn, $sql);
 
-               
-                $sql = "SELECT nama, gambar, deskripsi FROM produk WHERE id_produk = '$id_produk'";
-                $result = mysqli_query($conn, $sql);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $nama_produk = $row['nama'];
+        $harga_per_produk = $row['harga'];
 
-                if ($result) {
-                   
-                    if (mysqli_num_rows($result) > 0) {
-                        
-                        $row = mysqli_fetch_assoc($result);
-                        echo '<h2 class="text-center mb-4">Detail Produk</h2>';
-                        echo '<div class="card">';
-                        echo '<img src="data:image/jpeg;base64,' . base64_encode($row["gambar"]) . '" class="card-img-top" style="max-width: 300px; margin: auto;" />';
-                        echo '<div class="card-body">';
-                        echo '<h5 class="card-title text-center">' . $row["nama"] . '</h5>';
-                        echo '<p class="card-text">' . $row["deskripsi"] . '</p>';
-                        echo '</div>';
-                        echo '</div>';
-                    } else {
-                        echo '<div class="alert alert-danger" role="alert">Deskripsi tidak ditemukan.</div>';
-                    }
-                } else {
-                    echo '<div class="alert alert-danger" role="alert">Error: ' . mysqli_error($conn) . '</div>';
-                }
+        echo '<div style="background-color: #f8f9fa; border-radius: 10px; padding: 20px; width: 50%; margin: auto; text-align: center;">';
+        echo '<h2>Anda memilih untuk membeli produk: ' . $nama_produk . '</h2>';
 
-                mysqli_close($conn);
+        echo '<form action="" method="post" style="margin-top: 20px;">';
+        echo '<div class="mb-3">';
+        echo '<label for="jumlah" class="form-label">Jumlah Produk:</label>';
+        echo '<input type="number" class="form-control" id="jumlah" name="jumlah" min="1" required>';
+        echo '</div>';
+        echo '<button type="submit" class="btn btn-primary" name="hitung">Hitung Total Harga</button>';
+        echo '</form>';
+
+        if (isset($_POST['hitung'])) {
+            if (isset($_POST['jumlah'])) {
+                $jumlah = $_POST['jumlah'];
+                $total_harga = $jumlah * $harga_per_produk;
+                $_SESSION['total_harga'] = $total_harga; // Simpan total harga dalam SESSION
+                echo '<h3 style="margin-top: 20px;">Total Harga untuk ' . $jumlah . ' ' . $nama_produk . ': ' . $total_harga . '</h3>';
+
+                echo '<form action="proses_pembayaran.php" method="post">';
+                echo '<input type="hidden" name="id_produk" value="' . $id_produk . '">';
+                echo '<input type="hidden" name="jumlah" value="' . $jumlah . '">';
+                echo '<button type="submit" class="btn btn-success" name="bayar" style="margin-top: 20px;">Bayar Sekarang</button>';
+                echo '</form>';
             } else {
-                echo '<div class="alert alert-warning" role="alert">Parameter id tidak ditemukan.</div>';
+                echo '<div class="alert alert-warning mt-4" role="alert">Masukkan jumlah produk terlebih dahulu.</div>';
             }
-            ?>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+        }
+        echo '</div>';
+    } else {
+        echo '<div class="alert alert-danger" role="alert" style="text-align: center;">Produk tidak ditemukan.</div>';
+    }
+
+    mysqli_close($conn);
+} else {
+    echo '<div class="alert alert-warning" role="alert" style="text-align: center;">Anda belum memilih produk untuk dibeli.</div>';
+}
+?>

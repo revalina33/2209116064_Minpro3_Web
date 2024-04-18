@@ -1,6 +1,10 @@
 <?php
+ session_start();
+ if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
 
-session_start();
 
 $servername = "localhost";
 $username = "root";
@@ -27,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama = $_POST['nama'];
     $deskripsi = $_POST['deskripsi'];
     $harga = $_POST['harga'];
-    $gambar = addslashes(file_get_contents($_FILES['gambar']['tmp_name'])); // Mengambil data gambar
+    $gambar = addslashes(file_get_contents($_FILES['gambar']['tmp_name'])); 
 
     
     $nama = mysqli_real_escape_string($conn, $nama);
